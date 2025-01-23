@@ -1,36 +1,32 @@
 <script lang="ts">
-    import { saveSecret, type SecretDocument } from '$lib/firestore.ts';
-    import { doc } from 'firebase/firestore';
-
+    import { saveSecret, type SecretDocument } from '$lib/firestore';
     import { v4 } from 'uuid';
+    import { copy } from '$lib/utils';
 
     let secret: string = '';
     let n: number = 1;
-    let expiresAt: Date = new Date();
+    let expiresAt: Date = new Date(86400000000000);
     let passcode: string = '';
     let secretLink: string = '';
 
     const handleSubmit = (event: Event) => {
         event.preventDefault();
 
+        console.log(expiresAt.getTime())
         const uuid: string = v4();
         const createdAt: Date = new Date();
+        const expirationDate = new Date(expiresAt);
         const document: SecretDocument = {
             uuid,
             secret,
             n,
-            createdAt,
-            expiresAt,
+            createdAt: createdAt.getTime(),
+            expiresAt: expirationDate.getTime(),
             passcode
         };
 
         saveSecret(document);
         secretLink = `http://localhost:5173/secret/${uuid}`;
-    };
-
-    const copyLink = () => {
-        navigator.clipboard.writeText(secretLink);
-        alert('Link copied to clipboard!');
     };
 </script>
 
@@ -40,7 +36,7 @@
 
     <br />
 
-    <form on:submit={handleSubmit} class="form-fields">
+    <form onsubmit={handleSubmit} class="form-fields">
         <!-- Message Input -->
         <div class="input-group">
             <label for="secret-text" class="input-label">Your Secret</label>
@@ -75,11 +71,11 @@
 
             <!-- Expiration Date -->
             <div class="input-group flex-1">
-                <label for="expiration" class="input-label">Expiration Date</label>
+                <label for="expiration" class="input-label">Optional Expiration Date</label>
                 <input
                     type="date"
                     id="expiration"
-                    bind:value={expiresAt}
+                    value={expiresAt}
                     class="input-field"
                     disabled={!!secretLink}
                 />
@@ -121,7 +117,7 @@
                 class="input-field link"
                 placeholder="Your link will appear here"
             />
-            <button type="button" class="copy-button mt-2" on:click={copyLink}>
+            <button type="button" class="copy-button mt-2" onclick={() => copy(secretLink)}>
                 <i class="fa fa-clipboard"></i>
                 copy
             </button>

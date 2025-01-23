@@ -1,41 +1,47 @@
 import { db } from '$lib/firebase.ts';
-import { addDoc, collection, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, increment, setDoc, updateDoc } from 'firebase/firestore';
+
+const secretsCollection = collection(db, 'secrets');
 
 export interface SecretDocument {
     uuid: string;
     secret: string;
     n: number;
-    createdAt: Date;
-    expiresAt: Date;
+    createdAt: number;
+    expiresAt: number;
     passcode: string;
 }
 
 export const saveSecret = async (secret: SecretDocument) => {
     try {
-      await setDoc(doc(collection(db, "secrets"), secret.uuid), secret);
+        await setDoc(doc(secretsCollection, secret.uuid), secret);
     } catch (e) {
-      console.error('Error adding document: ', e);
-      throw new Error('Error adding document');
+        console.error('Error adding document: ', e);
+        throw new Error('Error adding document');
     }
 };
 
 export const getSecret = async (uuid: string): Promise<SecretDocument | null> => {
     try {
-      // Query Firestore for the document where uuid matches
-      const secretsCollection = collection(db, 'secrets');
-      const q = doc(secretsCollection, uuid); // Use uuid as the document ID
-      const docSnapshot = await getDoc(q);
-  
-      if (docSnapshot.exists()) {
-        console.log("yipee")
-        const secretData: SecretDocument = docSnapshot.data() as SecretDocument;
-        return secretData;
-      } else {
-        console.log("err")
+        const docRef = doc(secretsCollection, uuid);
+        const docSnapshot = await getDoc(docRef);
+
+        if (docSnapshot.exists()) {
+            const secretData: SecretDocument = docSnapshot.data() as SecretDocument;
+            console.log(`now: ${new Date().getTime()}`);
+            console.log(`exp: ${new Date(secretData.expiresAt).getTime()}`);
+            console.log(`n: ${secretData.n}`);
+
+            if (secretData.expiresAt >= new Date().getTime() && secretData.n >= 1) {
+                await updateDoc(docRef, {
+                    n: increment(-1)
+                });
+                return secretData;
+            }
+        }
         return null;
-      }
     } catch (e) {
-      console.error('Error retrieving document: ', e);
-      throw new Error('Error retrieving document');
+        console.error('Error retrieving document: ', e);
+        throw new Error('Error retrieving document');
     }
-  };
+};
