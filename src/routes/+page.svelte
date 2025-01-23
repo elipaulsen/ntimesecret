@@ -26,7 +26,7 @@
         };
 
         saveSecret(document);
-        secretLink = `http://localhost:5173/secret/${uuid}`;
+        secretLink = `https://ntimesecret.web.app/${uuid}`;
     };
 </script>
 
