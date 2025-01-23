@@ -12,7 +12,7 @@
     const handleSubmit = (event: Event) => {
         event.preventDefault();
 
-        console.log(expiresAt.getTime())
+        console.log(expiresAt.getTime());
         const uuid: string = v4();
         const createdAt: Date = new Date();
         const expirationDate = new Date(expiresAt);
@@ -21,7 +21,7 @@
             secret,
             n,
             createdAt: createdAt.getTime(),
-            expiresAt: expirationDate.getTime(),
+            expiresAt: expiresAt.getTime(),
             passcode
         };
 
@@ -83,6 +83,7 @@
         </div>
 
         <!-- Optional Passcode -->
+        <!---
         <div class="input-group">
             <label for="passcode" class="input-label">Optional Passcode</label>
             <input
@@ -94,6 +95,7 @@
                 disabled={!!secretLink}
             />
         </div>
+        -->
 
         <!-- Submit Button -->
         {#if !secretLink}

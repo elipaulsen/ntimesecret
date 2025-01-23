@@ -1,5 +1,6 @@
-import { db } from '$lib/firebase.ts';
+import { db } from '$lib/firebase';
 import { collection, doc, getDoc, increment, setDoc, updateDoc } from 'firebase/firestore';
+//import { decrypt, encrypt } from './utils';
 
 const secretsCollection = collection(db, 'secrets');
 
@@ -14,6 +15,9 @@ export interface SecretDocument {
 
 export const saveSecret = async (secret: SecretDocument) => {
     try {
+        if (secret.passcode) {
+            //encrypt secret
+        }
         await setDoc(doc(secretsCollection, secret.uuid), secret);
     } catch (e) {
         console.error('Error adding document: ', e);
@@ -28,9 +32,9 @@ export const getSecret = async (uuid: string): Promise<SecretDocument | null> =>
 
         if (docSnapshot.exists()) {
             const secretData: SecretDocument = docSnapshot.data() as SecretDocument;
-            console.log(`now: ${new Date().getTime()}`);
-            console.log(`exp: ${new Date(secretData.expiresAt).getTime()}`);
-            console.log(`n: ${secretData.n}`);
+            if (secretData.passcode) {
+                //decrypt secret
+            }
 
             if (secretData.expiresAt >= new Date().getTime() && secretData.n >= 1) {
                 await updateDoc(docRef, {

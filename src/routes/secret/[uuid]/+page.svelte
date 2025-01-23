@@ -9,7 +9,7 @@
 
     onMount(async () => {
         try {
-            secret = await getSecret(data.uuid); // Await the promise
+            secret = await getSecret(data.uuid);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -24,7 +24,6 @@
 			bind:value={secret.secret}
 			rows="4"
 			class="input-field"
-			placeholder="Enter your secret..."
 			required
 		></textarea>
 		<p>created on {new Date(secret.createdAt).toDateString()}</p>
