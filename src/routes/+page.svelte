@@ -1,18 +1,31 @@
 <script lang="ts">
+    import { saveSecret, type SecretDocument } from '$lib/firestore.ts';
+    import { doc } from 'firebase/firestore';
+
     import { v4 } from 'uuid';
 
-    let secret: string = "";
+    let secret: string = '';
     let n: number = 1;
-    let expiresIn: number = 1;
-    let passcode: string = "";
+    let expiresAt: Date = new Date();
+    let passcode: string = '';
+    let secretLink: string = '';
 
-    let secretLink: string = ""; // Store the generated link
-  
     const handleSubmit = (event: Event) => {
-      event.preventDefault();
+        event.preventDefault();
 
-      secretLink = `http://localhost:5173/secret/${v4()}`
-      console.log({ secret, n, expiresIn, passcode });
+        const uuid: string = v4();
+        const createdAt: Date = new Date();
+        const document: SecretDocument = {
+            uuid,
+            secret,
+            n,
+            createdAt,
+            expiresAt,
+            passcode
+        };
+
+        saveSecret(document);
+        secretLink = `http://localhost:5173/secret/${uuid}`;
     };
 
     const copyLink = () => {
@@ -25,36 +38,67 @@
     <h1>ntimesecret</h1>
     <h3>Once your secret has been accessed N times, it’s gone—forever.</h3>
 
-    <br>
+    <br />
 
     <form on:submit={handleSubmit} class="form-fields">
         <!-- Message Input -->
         <div class="input-group">
-          <label for="secret-text" class="input-label">Your Secret</label>
-          <textarea id="secret-text" bind:value={secret} rows="4" class="input-field" placeholder="Enter your secret..." required disabled={!!secretLink}></textarea>
+            <label for="secret-text" class="input-label">Your Secret</label>
+            <textarea
+                id="secret-text"
+                bind:value={secret}
+                rows="4"
+                class="input-field"
+                placeholder="Enter your secret..."
+                required
+                disabled={!!secretLink}
+            ></textarea>
         </div>
-  
+
         <!-- Number of Times to be Accessed -->
         <div class="flex space-x-4">
             <!-- Number of Views -->
             <div class="input-group flex-1">
-              <label for="max-views" class="input-label">How many times can this be viewed?</label>
-              <input type="number" id="max-views" bind:value={n} min="1" class="input-field" placeholder="N" required disabled={!!secretLink}/>
+                <label for="max-views" class="input-label">How many times can this be viewed?</label
+                >
+                <input
+                    type="number"
+                    id="max-views"
+                    bind:value={n}
+                    min="1"
+                    class="input-field"
+                    placeholder="N"
+                    required
+                    disabled={!!secretLink}
+                />
             </div>
-    
+
             <!-- Expiration Date -->
             <div class="input-group flex-1">
-              <label for="expiration" class="input-label">Expiration Date</label>
-              <input type="date" id="expiration" bind:value={expiresIn} class="input-field" disabled={!!secretLink}/>
+                <label for="expiration" class="input-label">Expiration Date</label>
+                <input
+                    type="date"
+                    id="expiration"
+                    bind:value={expiresAt}
+                    class="input-field"
+                    disabled={!!secretLink}
+                />
             </div>
         </div>
-  
+
         <!-- Optional Passcode -->
         <div class="input-group">
-          <label for="passcode" class="input-label">Optional Passcode</label>
-          <input type="text" id="passcode" bind:value={passcode} class="input-field" placeholder="Enter a passcode (optional)" disabled={!!secretLink}/>
+            <label for="passcode" class="input-label">Optional Passcode</label>
+            <input
+                type="text"
+                id="passcode"
+                bind:value={passcode}
+                class="input-field"
+                placeholder="Enter a passcode (optional)"
+                disabled={!!secretLink}
+            />
         </div>
-  
+
         <!-- Submit Button -->
         {#if !secretLink}
             <div class="submit-container">
@@ -63,10 +107,10 @@
         {/if}
     </form>
 
-    <br>
+    <br />
 
     {#if secretLink}
-        <br>
+        <br />
         <h3>Send this link out to share your secret!</h3>
         <div class="input-group flex items-center">
             <input
@@ -87,8 +131,5 @@
             <i class="fa fa-long-arrow-alt-left"></i>
             Make another secret
         </a>
-
     {/if}
-        
 </div>
-  
